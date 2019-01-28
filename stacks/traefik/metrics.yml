@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: traefik
+    command: --api --docker --docker.domain=localhost --docker.network=default_default --docker.watch --metrics --metrics.prometheus --metrics.prometheus.buckets="0.1,0.3,1.2,5.0"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
