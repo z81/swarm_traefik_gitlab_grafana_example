@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+  web:
+    image: nodetest
+    ports:
+      - "8000:8000"
+
+    labels:
+      - "traefik.frontend.rule=Host:node.localhost"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure

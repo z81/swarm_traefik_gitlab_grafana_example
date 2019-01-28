@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+  hello:
+    image: nginxdemos/hello:plain-text
+    ports:
+      - "5080:80"
+
+    labels:
+      - "traefik.frontend.rule=Host:localhost;Path:/nginx"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
