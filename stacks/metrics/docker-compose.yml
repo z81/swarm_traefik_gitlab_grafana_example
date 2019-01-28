@@ -41,7 +41,7 @@ services:
    volumes:
      - ./alertmanager/:/etc/alertmanager/
    command:
-     - '--config.file=/etc/alertmanager/config-email.yml'
+     - '--config.file=/etc/alertmanager/config.yml'
      - '--storage.path=/alertmanager'
      - '--web.listen-address=0.0.0.0:9093'
    ports:
