@@ -29,5 +29,6 @@ deploy-to-swarm:
     - docker login -u root -p $HUB_REGISTRY_PASSWORD $CI_REGISTRY
     - cd stacks/traefik
     - docker stack deploy -c metrics.ymll $SERVICE_NAME --with-regist
+    - rm -rf $DOCKER_CERT_PATH
   only:
     - master

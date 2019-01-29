@@ -18,7 +18,7 @@ echo extendedKeyUsage = clientAuth >> extfile.cnf
 openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -extfile extfile.cnf
 rm -v client.csr server.csr
 
-echo "ca.pem (TLSACERT)"
+echo "ca.pem (TLSCACERT)"
 cat ca.pem
 
 echo "cert.pem (TLSCERT)"
