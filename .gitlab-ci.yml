@@ -1,0 +1,26 @@
+image: docker:latest
+
+stages:
+  # - build
+  - deploy-to-swarm
+
+# build:
+#     stage: build
+#     script:
+#         - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+#         - docker pull $CONTAINER_IMAGE:latest || true
+#         - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_BUILD_REF --tag $CONTAINER_IMAGE:latest ./
+#         - docker push $CONTAINER_IMAGE:$CI_BUILD_REF
+#         - docker push $CONTAINER_IMAGE:latest
+#     only:
+#         - master
+
+deploy-to-swarm:
+  stage: deploy
+  variables:
+    DOCKER_HOST: tcp://$HOST:2375
+  script:
+    - cd stacks/traefik
+    - docker stack deploy --with-registry-auth --compose-file=metrics.yml $SERVICE_NAME
+  only:
+    - master
