@@ -16,7 +16,7 @@ stages:
 #         - master
 
 deploy-to-swarm:
-  stage: deploy
+  stage: deploy-to-swarm
   variables:
     DOCKER_HOST: tcp://$HOST:2376
     DOCKER_TLS_VERIFY: 1
