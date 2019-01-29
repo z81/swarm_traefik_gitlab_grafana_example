@@ -26,7 +26,7 @@ deploy-to-swarm:
     - echo "$TLSCACERT" > $DOCKER_CERT_PATH/ca.pem
     - echo "$TLSCERT" > $DOCKER_CERT_PATH/cert.pem
     - echo "$TLSKEY" > $DOCKER_CERT_PATH/key.pem
-    - docker login -u root -p $HUB_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker login -u root -p $HUB_REGISTRY_PASSWORD $DOCKER_HOST
     - cd stacks/traefik
     - docker stack deploy -c metrics.ymll $SERVICE_NAME --with-regist
     - rm -rf $DOCKER_CERT_PATH
