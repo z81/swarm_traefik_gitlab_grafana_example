@@ -3,3 +3,9 @@
 .vscode/
 .idea/
 alertmanager/config-email.yml
+*.key
+*.pem
+*.crt
+*.csr
+*.cnf
+*.srl

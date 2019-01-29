@@ -18,9 +18,16 @@ stages:
 deploy-to-swarm:
   stage: deploy
   variables:
-    DOCKER_HOST: tcp://$HOST:2375
+    DOCKER_HOST: tcp://$HOST:2376
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "/certs"
   script:
+    - mkdir -p $DOCKER_CERT_PATH
+    - echo "$TLSCACERT" > $DOCKER_CERT_PATH/ca.pem
+    - echo "$TLSCERT" > $DOCKER_CERT_PATH/cert.pem
+    - echo "$TLSKEY" > $DOCKER_CERT_PATH/key.pem
+    - docker login -u root -p $HUB_REGISTRY_PASSWORD $CI_REGISTRY
     - cd stacks/traefik
-    - docker stack deploy --with-registry-auth --compose-file=metrics.yml $SERVICE_NAME
+    - docker stack deploy -c metrics.ymll $SERVICE_NAME --with-regist
   only:
     - master
