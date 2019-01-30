@@ -28,6 +28,6 @@ deploy:
     - ssh deployer@$HOST "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com"
     - ssh deployer@$HOST "rm ~/docker-compose.yml" || true
     - cat metrics.yml | ssh deployer@$HOST "cat > ~/docker-compose.yml" || true
-    - ssh deployer@$HOST "export HOST=$DOMAIN;export SERVICE_NAME=$SERVICE_NAME;docker stack deploy -c ~/docker-compose.yml $SERVICE_NAME --with-registry-auth" || true
+    - ssh deployer@$HOST "HOST=$DOMAIN docker stack deploy -c ~/docker-compose.yml $SERVICE_NAME --with-registry-auth" || true
   only:
     - master
