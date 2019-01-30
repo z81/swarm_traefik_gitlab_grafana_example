@@ -2,7 +2,7 @@ image: docker:latest
 
 stages:
   # - build
-  - deploy-to-swarm
+  - deploy
 
 # build:
 #     stage: build
@@ -15,20 +15,18 @@ stages:
 #     only:
 #         - master
 
-deploy-to-swarm:
-  stage: deploy-to-swarm
-  variables:
-    DOCKER_HOST: tcp://$HOST:2376
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_CERT_PATH: "/certs"
+deploy:
+  stage: deploy
+  image: kroniak/ssh-client:3.6
   script:
-    - mkdir -p $DOCKER_CERT_PATH
-    - echo "$TLSCACERT" > $DOCKER_CERT_PATH/ca.pem
-    - echo "$TLSCERT" > $DOCKER_CERT_PATH/cert.pem
-    - echo "$TLSKEY" > $DOCKER_CERT_PATH/key.pem
-    - docker login -u root -p $PASS 51.75.70.34:2376
+    - mkdir ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - cd stacks/traefik
-    - docker stack deploy -c metrics.yml $SERVICE_NAME --with-regist
-    - rm -rf $DOCKER_CERT_PATH
+    - ssh deployer@$HOST "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com"
+    - cat metrics.yml | ssh user@remotehost "cat > ~/docker-compose.yml"
+    - ssh deployer@$HOST "docker stack deploy -c ~/docker-compose.yml $SERVICE_NAME --with-regist" || true
   only:
     - master
