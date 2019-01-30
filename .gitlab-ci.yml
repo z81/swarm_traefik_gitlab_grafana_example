@@ -27,7 +27,7 @@ deploy:
     - cd stacks/traefik
     - ssh deployer@$HOST "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com"
     - ssh deployer@$HOST "rm ~/docker-compose.yml"
-    - cat metrics.yml | ssh deployer@$HOST "cat > ~/docker-compose.yml"
+    - cat metrics.yml | ssh deployer@$HOST "cat > ~/docker-compose.yml" || true
     - ssh deployer@$HOST "docker stack deploy -c ~/docker-compose.yml $SERVICE_NAME --with-regist" || true
   only:
     - master
