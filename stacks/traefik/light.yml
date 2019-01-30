@@ -3,7 +3,7 @@ version: '3'
 services:
   reverse-proxy:
     image: traefik
-    command: --api --docker --docker.domain=localhost --docker.network=default_default --docker.watch
+    command: --api --docker --docker.domain=${HOST:-localhost} --docker.network=${SERVICE_NAME:-default}_default --docker.watch
     ports:
       - "80:80"
       - "8080:8080"
