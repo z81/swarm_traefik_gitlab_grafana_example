@@ -26,7 +26,8 @@ deploy:
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - cd stacks/traefik
     - ssh deployer@$HOST "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com"
-    - cat metrics.yml | ssh user@remotehost "cat > ~/docker-compose.yml"
+    - ssh deployer@$HOST "rm ~/docker-compose.yml"
+    - cat metrics.yml | ssh deployer@$HOST "cat > ~/docker-compose.yml"
     - ssh deployer@$HOST "docker stack deploy -c ~/docker-compose.yml $SERVICE_NAME --with-regist" || true
   only:
     - master
