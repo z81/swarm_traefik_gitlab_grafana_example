@@ -1,33 +1,40 @@
 image: docker:latest
 
+services:
+  - docker:dind
+
 stages:
-  # - build
-  - deploy
+  - build
+  - deploy-to-swarm
 
-# build:
-#     stage: build
-#     script:
-#         - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
-#         - docker pull $CONTAINER_IMAGE:latest || true
-#         - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_BUILD_REF --tag $CONTAINER_IMAGE:latest ./
-#         - docker push $CONTAINER_IMAGE:$CI_BUILD_REF
-#         - docker push $CONTAINER_IMAGE:latest
-#     only:
-#         - master
+variables:
+  CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
 
-deploy:
-  stage: deploy
-  image: kroniak/ssh-client:3.6
+build:
+  stage: build
   script:
-    - mkdir ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
-    - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+    - docker pull $CONTAINER_IMAGE:latest || true
+    - docker build --cache-from $CONTAINER_IMAGE:latest --tag $CONTAINER_IMAGE:$CI_BUILD_REF --tag $CONTAINER_IMAGE:latest ./
+    - docker push $CONTAINER_IMAGE:$CI_BUILD_REF
+    - docker push $CONTAINER_IMAGE:latest
+  only:
+    - master
+
+deploy-to-swarm:
+  stage: deploy-to-swarm
+  variables:
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "/certs"
+  script:
+    - mkdir -p $DOCKER_CERT_PATH
+    - echo "$TLSCACERT" > $DOCKER_CERT_PATH/ca.pem
+    - echo "$TLSCERT" > $DOCKER_CERT_PATH/cert.pem
+    - echo "$TLSKEY" > $DOCKER_CERT_PATH/key.pem
     - cd stacks/traefik
-    - ssh deployer@$HOST "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com"
-    - ssh deployer@$HOST "rm ~/docker-compose.yml" || true
-    - cat metrics.yml | ssh deployer@$HOST "cat > ~/docker-compose.yml" || true
-    - ssh deployer@$HOST "HOST=$DOMAIN docker stack deploy -c ~/docker-compose.yml $SERVICE_NAME --with-registry-auth" || true
+    - docker -H=$HOST --tlsverify --tlscacert=$DOCKER_CERT_PATH/ca.pem --tlscert=$DOCKER_CERT_PATH/cert.pem --tlskey=$DOCKER_CERT_PATH/key.pem stack deploy --with-registry-auth -c metrics.yml $SERVICE_NAME
+    - rm -rf $DOCKER_CERT_PATH
   only:
     - master
